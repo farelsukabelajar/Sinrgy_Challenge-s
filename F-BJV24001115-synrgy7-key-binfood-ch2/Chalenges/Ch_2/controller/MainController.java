@@ -54,7 +54,7 @@ public class MainController {
                         System.out.println("\nTerima kasih telah menggunakan Binar Food.\n");
                         break;
                     default:
-                        System.out.println("Pilihan tidak valid. Silakan pilih lagi.");
+                        System.out.println("\nPilihan tidak valid. Silakan pilih lagi.");
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.println("\nMasukkan nomor menu yang valid.");
