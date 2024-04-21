@@ -1,5 +1,8 @@
 package synrgy.binfod.controller;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -8,9 +11,6 @@ import synrgy.binfod.model.*;
 import synrgy.binfod.util.ErrorHandling;
 import synrgy.binfod.util.ReceiptUpdater;
 import synrgy.binfod.view.MainView;
-
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class MainController {
     private Menu menu;
@@ -52,7 +52,7 @@ public class MainController {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.println("\nMasukkan nomor menu yang valid.");
-                scanner.nextLine(); 
+                scanner.nextLine();
                 choice = -1;
             }
         } while (choice != 0);
@@ -89,7 +89,7 @@ public class MainController {
             System.out.println("\nTidak ada pesanan untuk dikonfirmasi.");
         }
     }
-    
+
     private void confirmOrder(List<Order> orders) {
         view.displayConfirm();
         System.out.print("\nApakah Anda ingin mengkonfirmasi pesanan? (y/t): ");
@@ -102,21 +102,23 @@ public class MainController {
             orders.clear();
         }
     }
-    
+
     private Order createOrder(MenuItem menuItem, int quantity) {
         if (menuItem instanceof FoodMenuItem) {
-            return new FoodOrder((FoodMenuItem) menuItem, quantity);
+            return new FoodOrder(menuItem, quantity);
         } else if (menuItem instanceof DrinkMenuItem) {
-            return new DrinkOrder((DrinkMenuItem) menuItem, quantity);
+            return new DrinkOrder(menuItem, quantity);
         } else {
             throw new IllegalArgumentException("MenuItem tidak valid.");
         }
     }
 
     private void saveReceiptToFile(List<Order> orders) {
-        try (FileWriter writer = new FileWriter("struk.txt", true)) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("struk.txt", true))) {
             String receipt = ReceiptUpdater.generateReceipt(orders);
             writer.write(receipt);
+            writer.newLine();
+            writer.flush();
         } catch (IOException e) {
             ErrorHandling.handleException(e);
         }
