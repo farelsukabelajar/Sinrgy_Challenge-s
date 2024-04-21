@@ -2,6 +2,7 @@ package synrgy.binfod.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Menu {
     private List<MenuItem> menuItems;
@@ -18,5 +19,17 @@ public class Menu {
     public List<MenuItem> getMenuItems() {
         return menuItems;
     }
-}
 
+    public MenuItem findItemByName(String name) {
+        return menuItems.stream()
+                        .filter(item -> item.getName().equalsIgnoreCase(name))
+                        .findFirst() 
+                        .orElse(null); 
+    }
+
+    public List<MenuItem> findItemsByType(String type) {
+        return menuItems.stream() 
+                        .filter(item -> item.getClass().getSimpleName().contains(type)) 
+                        .collect(Collectors.toList()); 
+    }
+}
