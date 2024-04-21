@@ -12,7 +12,14 @@ import synrgy.binfod.util.ReceiptUpdater;
 import synrgy.binfod.view.MainView;
 
 public class OrderService {
+
     private List<Order> orders;
+
+    public int calculateTotalPrice(List<Order> orders) {
+        return orders.stream()
+                .mapToInt(Order::getTotalPrice)
+                .sum();
+    }
 
     public OrderService() {
         this.orders = new ArrayList<>();
@@ -47,9 +54,9 @@ public class OrderService {
 
     private Order createOrder(MenuItem menuItem, int quantity) {
         if (menuItem instanceof FoodMenuItem) {
-            return new FoodOrder((FoodMenuItem) menuItem, quantity);
+            return new FoodOrder(menuItem, quantity);
         } else if (menuItem instanceof DrinkMenuItem) {
-            return new DrinkOrder((DrinkMenuItem) menuItem, quantity);
+            return new DrinkOrder(menuItem, quantity);
         } else {
             throw new IllegalArgumentException("MenuItem tidak valid.");
         }
