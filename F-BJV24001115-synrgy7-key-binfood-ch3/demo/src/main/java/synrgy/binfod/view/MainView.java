@@ -8,33 +8,41 @@ import synrgy.binfod.model.MenuItem;
 import synrgy.binfod.model.Order;
 
 public class MainView {
-    public void displayMenu() {
+
+    private void lineWithSpace() {
         System.out.println("\n=========================================");
+    }
+
+    private void lineNoSpace() {
+        System.out.println("=========================================");
+    }
+
+    public void displayMenu() {
+        lineWithSpace();
         System.out.println("                  Menu                  ");
-        System.out.println("=========================================\n");
-        System.out.println("1. Pilih Menu");
+        lineNoSpace();
+        System.out.println("\n1. Pilih Menu");
         System.out.println("2. Lihat Struk");
         System.out.println("0. Keluar");
     }
 
     public void displayItems(List<? extends MenuItem> items) {
-        System.out.println("\n=========================================");
+        lineWithSpace();
         System.out.println("       Selamat datang di BinarFud       ");
-        System.out.println("=========================================\n");
-        System.out.println("Menu\t\t\tHarga");
-        for (int i = 0; i < items.size(); i++) {
-            MenuItem item = items.get(i);
-            System.out.println((i + 1) + ". " + item.getName() + "\t\tRp. " + item.getPrice());
-        }
+        lineNoSpace();
+        System.out.println("\nMenu\t\t\tHarga");
+
+        items.stream()
+                .forEach(item -> System.out.println(item.getName() + "\t\tRp. " + item.getPrice()));
     }
 
     public void displayReceipt(List<Order> orders) {
         int totalItems = 0;
         int totalPrice = 0;
 
-        System.out.println("\n===========================================");
+        lineWithSpace();
         System.out.println("             Struk Pembayaran              ");
-        System.out.println("===========================================");
+        lineNoSpace();
         System.out.printf("\n%-20s %-10s %-10s%n", "Menu", "Qty", "Harga\n\n");
 
         for (Order order : orders) {
@@ -53,19 +61,19 @@ public class MainView {
         System.out.println("\n\n===========================================");
         System.out.println("            Simpan Struk Sebagai           ");
         System.out.println("              Bukti Pembayaran             ");
-        System.out.println("===========================================");
+        lineNoSpace();
     }
 
     public void displayConfirm() {
-        System.out.println("\n=========================================");
+        lineWithSpace();
         System.out.println("            Konfirmasi Pemesanan            ");
-        System.out.println("=========================================");
+        lineNoSpace();
     }
 
     public void displayAddMenu() {
-        System.out.println("\n=========================================");
+        lineWithSpace();
         System.out.println("               Tambah Pesanan              ");
-        System.out.println("=========================================");
+        lineNoSpace();
     }
 
     private String getCurrentDateTime() {
