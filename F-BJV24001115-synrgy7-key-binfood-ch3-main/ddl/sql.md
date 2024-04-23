@@ -1,1 +1,0 @@
-Note: "Database query menggunakan MySQL"
