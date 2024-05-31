@@ -1,7 +1,7 @@
 package com.org.binarfud.controller;
 
-import com.org.binarfud.model.Merchant;
-import com.org.binarfud.repo.MerchantRepo;
+import com.org.binarfud.dto.MerchantDTO;
+import com.org.binarfud.service.MerchantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,59 +11,37 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/merchants")
+@RequestMapping("/api/merchants")
 public class MerchantController {
 
     @Autowired
-    private MerchantRepo merchantRepo;
+    private MerchantService merchantService;
 
-    // Get all merchants
     @GetMapping
-    public List<Merchant> getAllMerchants() {
-        return merchantRepo.findAll();
+    public List<MerchantDTO> getAllMerchants() {
+        return merchantService.getAllMerchants();
     }
 
-    // Get merchant by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Merchant> getMerchantById(@PathVariable UUID id) {
-        Optional<Merchant> merchant = merchantRepo.findById(id);
-        if (merchant.isPresent()) {
-            return ResponseEntity.ok(merchant.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<MerchantDTO> getMerchantById(@PathVariable UUID id) {
+        Optional<MerchantDTO> merchantDTO = merchantService.getMerchantById(id);
+        return merchantDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Create new merchant
     @PostMapping
-    public Merchant createMerchant(@RequestBody Merchant merchant) {
-        return merchantRepo.save(merchant);
+    public MerchantDTO createMerchant(@RequestBody MerchantDTO merchantDTO) {
+        return merchantService.createMerchant(merchantDTO);
     }
 
-    // Update existing merchant
     @PutMapping("/{id}")
-    public ResponseEntity<Merchant> updateMerchant(@PathVariable UUID id, @RequestBody Merchant merchantDetails) {
-        Optional<Merchant> optionalMerchant = merchantRepo.findById(id);
-        if (optionalMerchant.isPresent()) {
-            Merchant merchant = optionalMerchant.get();
-            merchant.setName(merchantDetails.getName());
-            merchant.setLocation(merchantDetails.getLocation());
-            merchant.setOpen(merchantDetails.isOpen());
-            return ResponseEntity.ok(merchantRepo.save(merchant));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<MerchantDTO> updateMerchant(@PathVariable UUID id, @RequestBody MerchantDTO merchantDTO) {
+        Optional<MerchantDTO> updatedMerchant = merchantService.updateMerchant(id, merchantDTO);
+        return updatedMerchant.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Delete merchant
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchant(@PathVariable UUID id) {
-        Optional<Merchant> merchant = merchantRepo.findById(id);
-        if (merchant.isPresent()) {
-            merchantRepo.delete(merchant.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        merchantService.deleteMerchant(id);
+        return ResponseEntity.noContent().build();
     }
 }

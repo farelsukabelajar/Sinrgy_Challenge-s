@@ -1,70 +1,33 @@
 package com.org.binarfud.controller;
 
-import com.org.binarfud.model.OrderDetail;
-import com.org.binarfud.repo.OrderDetailRepo;
+import com.org.binarfud.dto.OrderDetailDTO;
+import com.org.binarfud.model.Order;
+import com.org.binarfud.service.OrderDetailService;
+import com.org.binarfud.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/order-details")
+@RequestMapping("/api/order-details")
 public class OrderDetailController {
 
     @Autowired
-    private OrderDetailRepo orderDetailRepo;
+    private OrderDetailService orderDetailService;
 
-    // Get all order details
-    @GetMapping
-    public List<OrderDetail> getAllOrderDetails() {
-        return orderDetailRepo.findAll();
-    }
+    @Autowired
+    private OrderService orderService;
 
-    // Get order detail by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderDetail> getOrderDetailById(@PathVariable UUID id) {
-        Optional<OrderDetail> orderDetail = orderDetailRepo.findById(id);
-        if (orderDetail.isPresent()) {
-            return ResponseEntity.ok(orderDetail.get());
-        } else {
+    @PostMapping("/{orderId}")
+    public ResponseEntity<OrderDetailDTO> createOrderDetail(@PathVariable UUID orderId, @RequestBody OrderDetailDTO orderDetailDTO) {
+        Optional<Order> order = orderService.getOrderById(orderId).map(orderDTO -> orderService.convertToEntity(orderDTO));
+        if (!order.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    // Create new order detail
-    @PostMapping
-    public OrderDetail createOrderDetail(@RequestBody OrderDetail orderDetail) {
-        return orderDetailRepo.save(orderDetail);
-    }
-
-    // Update existing order detail
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderDetail> updateOrderDetail(@PathVariable UUID id, @RequestBody OrderDetail orderDetailDetails) {
-        Optional<OrderDetail> optionalOrderDetail = orderDetailRepo.findById(id);
-        if (optionalOrderDetail.isPresent()) {
-            OrderDetail orderDetail = optionalOrderDetail.get();
-            orderDetail.setQuantity(orderDetailDetails.getQuantity());
-            orderDetail.setTotalPrice(orderDetailDetails.getTotalPrice());
-            orderDetail.setProduct(orderDetailDetails.getProduct());
-            orderDetail.setOrder(orderDetailDetails.getOrder());
-            return ResponseEntity.ok(orderDetailRepo.save(orderDetail));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Delete order detail
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderDetail(@PathVariable UUID id) {
-        Optional<OrderDetail> orderDetail = orderDetailRepo.findById(id);
-        if (orderDetail.isPresent()) {
-            orderDetailRepo.delete(orderDetail.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        OrderDetailDTO createdOrderDetail = orderDetailService.createOrderDetail(orderDetailDTO, order.get());
+        return ResponseEntity.ok(createdOrderDetail);
     }
 }

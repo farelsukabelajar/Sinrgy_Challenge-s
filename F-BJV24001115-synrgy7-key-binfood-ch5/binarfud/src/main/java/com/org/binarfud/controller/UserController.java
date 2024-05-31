@@ -1,79 +1,47 @@
 package com.org.binarfud.controller;
 
-import com.org.binarfud.model.User;
-import com.org.binarfud.repo.UserRepo;
+import com.org.binarfud.dto.UserDTO;
+import com.org.binarfud.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID; // Import UUID
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
-    private UserRepo userRepo;
+    private UserService userService;
 
-    // Get all users
     @GetMapping
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+    public List<UserDTO> getAllUsers() {
+        return userService.getAllUsers();
     }
 
-    // Get user by ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable UUID id) { // Change method signature to accept UUID
-        Optional<User> user = userRepo.findById(id);
-        if (user.isPresent()) {
-            return ResponseEntity.ok(user.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
+        Optional<UserDTO> userDTO = userService.getUserById(id);
+        return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Create new user
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userRepo.save(user);
+    public UserDTO createUser(@RequestBody UserDTO userDTO) {
+        return userService.createUser(userDTO);
     }
 
-    // Update existing user
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
-        Optional<User> optionalUser = userRepo.findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-
-            // Update properties based on the values received from the requestBody
-            user.setUsername(userDetails.getUsername());
-
-            // Check if emailAddress is not null before updating
-            if (userDetails.getEmailAddress() != null) {
-                user.setEmailAddress(userDetails.getEmailAddress());
-            } else {
-                // Handle the case where emailAddress is null
-                return ResponseEntity.badRequest().build(); // Changed from body("Email address cannot be null")
-            }
-
-            user.setPassword(userDetails.getPassword());
-            return ResponseEntity.ok(userRepo.save(user));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserDTO userDTO) {
+        Optional<UserDTO> updatedUser = userService.updateUser(id, userDTO);
+        return updatedUser.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Delete user
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) { // Change method signature to accept UUID
-        Optional<User> user = userRepo.findById(id);
-        if (user.isPresent()) {
-            userRepo.delete(user.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

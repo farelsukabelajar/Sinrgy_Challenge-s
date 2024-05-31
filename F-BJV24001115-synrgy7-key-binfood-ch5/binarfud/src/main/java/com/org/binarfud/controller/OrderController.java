@@ -1,7 +1,7 @@
 package com.org.binarfud.controller;
 
-import com.org.binarfud.model.Order;
-import com.org.binarfud.repo.OrderRepo;
+import com.org.binarfud.dto.OrderDTO;
+import com.org.binarfud.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,59 +11,37 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/orders")
 public class OrderController {
 
     @Autowired
-    private OrderRepo orderRepo;
+    private OrderService orderService;
 
-    // Get all orders
     @GetMapping
-    public List<Order> getAllOrders() {
-        return orderRepo.findAll();
+    public List<OrderDTO> getAllOrders() {
+        return orderService.getAllOrders();
     }
 
-    // Get order by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable UUID id) {
-        Optional<Order> order = orderRepo.findById(id);
-        if (order.isPresent()) {
-            return ResponseEntity.ok(order.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable UUID id) {
+        Optional<OrderDTO> orderDTO = orderService.getOrderById(id);
+        return orderDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Create new order
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderRepo.save(order);
+    public OrderDTO createOrder(@RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(orderDTO);
     }
 
-    // Update existing order
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable UUID id, @RequestBody Order orderDetails) {
-        Optional<Order> optionalOrder = orderRepo.findById(id);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            order.setDestinationAddress(orderDetails.getDestinationAddress());
-            order.setOrderTime(orderDetails.getOrderTime());
-            order.setIsComplete(orderDetails.getIsComplete());
-            return ResponseEntity.ok(orderRepo.save(order));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<OrderDTO> updateOrder(@PathVariable UUID id, @RequestBody OrderDTO orderDTO) {
+        Optional<OrderDTO> updatedOrder = orderService.updateOrder(id, orderDTO);
+        return updatedOrder.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Delete order
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
-        Optional<Order> order = orderRepo.findById(id);
-        if (order.isPresent()) {
-            orderRepo.delete(order.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
     }
 }
